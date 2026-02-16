@@ -14,6 +14,8 @@ import {
   Trophy,
   ExternalLink,
   Sparkles,
+  Presentation,
+  LayoutTemplate,
 } from "lucide-react";
 
 // --- 常量数据 ---
@@ -21,7 +23,8 @@ const OFFICE_BG_URL = "https://img.bytelife.ai/officevalley/background.jpg";
 
 const BOSS_SKILLS = [
   { id: "b1", name: "下班·封印术", nickname: "17:59分的发起人", desc: "17:59 发起会议，锁定下班按钮", attackText: "快下班了，`简单`开个会，所有人进会议室！", satisfiedText: "既然你还有紧急交付，那这次会你先不用参加了，看纪要吧。", icon: PhoneCall },
-  { id: "b2", name: "微操·周报催命", nickname: "对齐颗粒度的王总", desc: "要求精确到分钟的日报，体力减半", attackText: "这周产出不够饱和啊，发个周报看看？", satisfiedText: "这个总结非常有深度，看到你对底层架构的思考了，不错。", icon: FileText }
+  { id: "b2", name: "微操·周报催命", nickname: "对齐颗粒度的王总", desc: "要求精确到分钟的日报，体力减半", attackText: "这周产出不够饱和啊，发个周报看看？", satisfiedText: "这个总结非常有深度，看到你对底层架构的思考了，不错。", icon: FileText },
+  { id: "b3", name: "凌晨·幻灯片瞬移术", nickname: "8点晨会发起人", desc: "凌晨3点收到消息：明早8点过一下PPT", attackText: "今晚辛苦下，简单画几个片子，明早 8 点汇报用！", satisfiedText: "这个逻辑框架和视觉效果都不错，辛苦了，明早你来汇报。", icon: Presentation }
 ];
 
 const ALL_EMP_SKILLS = [
@@ -38,7 +41,27 @@ const ALL_EMP_SKILLS = [
     techTitle: "Kimi.ai 智能扩写", 
     castSteps: ["扫描原始日报文本...", "提取核心交付物...", "注入‘底层逻辑’等大厂黑话...", "生成深度工作复盘..."],
     actionBtn: "生成周报", resultType: "file", resultTitle: "本周工作复盘.docx", resultDesc: "字数: 3,420 | 查重率: 0% | 黑话浓度: 极高", link: "https://kimi.moonshot.cn/" 
+  },
+  {
+    id: "e3", name: "AI 生成·秒出大纲", nickname: "PPT 纺织工", desc: "一键生成 PPT 大纲与内容", icon: LayoutTemplate,
+    brand: "豆包 AI", brandColor: "#0066FF", brandIcon: MessageCircle, isPPT: true,
+    techTitle: "豆包 AI 正在构建演示文稿",
+    castSteps: ["解析指令...", "生成大纲...", "填充内容...", "智能排版...", "导出文件..."],
+    actionBtn: "下载 PPT", resultType: "file", resultTitle: "汇报方案.pptx", resultDesc: "页数: 12 | 风格: 极简商务 | 生成耗时: 30s", link: "https://www.doubao.com/"
+  },
+  {
+    id: "e4", name: "美学·视觉重构", nickname: "幻灯片魔术师", desc: "Gamma 网页级演示效果", icon: Sparkles,
+    brand: "Gamma", brandColor: "#8B5CF6", brandIcon: Sparkles, isPPT: true,
+    techTitle: "Gamma 正在渲染视觉层",
+    castSteps: ["解析指令...", "生成大纲...", "填充内容...", "智能排版...", "导出文件..."],
+    actionBtn: "在线演示", resultType: "link", resultTitle: "项目汇报 - Gamma", resultDesc: "交互式网页幻灯片", link: "https://gamma.app/"
   }
+];
+
+const PPT_TOOLS_GUIDE = [
+  { name: "豆包 AI PPT", desc: "字节跳动出品，逻辑理解力强，适合中文语境。", link: "https://www.doubao.com" },
+  { name: "Gamma", desc: "网页级演示效果，审美极高，适合创意汇报。", link: "https://gamma.app" },
+  { name: "AiPPT", desc: "专业的文档转 PPT 工具，模板丰富。", link: "https://www.aippt.cn" }
 ];
 
 const GUIDE_SKILLS = {
@@ -67,10 +90,60 @@ const GUIDE_SKILLS = {
       "[约束条件] 清晰说明背景、动作、结果与价值；给出1-2个可量化指标或合理区间；避免空话与夸大；字数 150-220 字。\n" +
       "[输出格式] 输出一段周报正文，不要标题。",
     link: "https://kimi.moonshot.cn/"
+  },
+  e3: {
+    id: "e3",
+    type: "ppt_collection",
+    brand: "PPT 神器",
+    brandColor: "#0066FF",
+    brandIcon: LayoutTemplate,
+    tools: PPT_TOOLS_GUIDE,
+    masterPrompt:
+      "[角色设定]\n" +
+      "你是一位拥有 10 年经验的顶级战略咨询顾问与视觉演示专家，擅长将复杂的信息转化为逻辑严谨、极具说服力的 PPT 演示文稿。\n" +
+      "[任务目标]\n" +
+      "请为主题 **“{在此输入你的 PPT 主题，例如：2024 年度复盘与明年展望}”** 构建一份详细的 PPT 逻辑大纲。这份 PPT 的主要受众是 **“{在此输入受众，例如：部门领导及核心团队}”**。\n" +
+      "[结构要求]\n" +
+      "请遵循以下逻辑框架生成 8-12 页的内容：\n" +
+      "1. **封面页**：一个有力且专业的标题。\n" +
+      "2. **背景/现状**：用数据或事实简述当前的情况。\n" +
+      "3. **核心痛点**：精准识别并分析 2-3 个关键问题。\n" +
+      "4. **解决方案**：提出针对性的应对策略或核心行动计划。\n" +
+      "5. **价值预估**：该方案能带来的可量化收益或预期效果。\n" +
+      "6. **总结与行动**：下一步的明确安排或致谢。\n\n" +
+      "[输出要求]\n" +
+      "1. **格式**：请使用 Markdown 格式输出。\n" +
+      "2. **详情**：每一页需包含 [页面标题]、[核心论点（3-5条）]、以及 [建议配图/视觉元素建议]。\n" +
+      "3. **语气**：专业、克制、结果导向。"
+  },
+  e4: {
+    id: "e4",
+    type: "ppt_collection",
+    brand: "PPT 神器",
+    brandColor: "#8B5CF6",
+    brandIcon: Sparkles,
+    tools: PPT_TOOLS_GUIDE,
+    masterPrompt:
+      "[角色设定]\n" +
+      "你是一位拥有 10 年经验的顶级战略咨询顾问与视觉演示专家，擅长将复杂的信息转化为逻辑严谨、极具说服力的 PPT 演示文稿。\n" +
+      "[任务目标]\n" +
+      "请为主题 **“{在此输入你的 PPT 主题，例如：2024 年度复盘与明年展望}”** 构建一份详细的 PPT 逻辑大纲。这份 PPT 的主要受众是 **“{在此输入受众，例如：部门领导及核心团队}”**。\n" +
+      "[结构要求]\n" +
+      "请遵循以下逻辑框架生成 8-12 页的内容：\n" +
+      "1. **封面页**：一个有力且专业的标题。\n" +
+      "2. **背景/现状**：用数据或事实简述当前的情况。\n" +
+      "3. **核心痛点**：精准识别并分析 2-3 个关键问题。\n" +
+      "4. **解决方案**：提出针对性的应对策略或核心行动计划。\n" +
+      "5. **价值预估**：该方案能带来的可量化收益或预期效果。\n" +
+      "6. **总结与行动**：下一步的明确安排或致谢。\n\n" +
+      "[输出要求]\n" +
+      "1. **格式**：请使用 Markdown 格式输出。\n" +
+      "2. **详情**：每一页需包含 [页面标题]、[核心论点（3-5条）]、以及 [建议配图/视觉元素建议]。\n" +
+      "3. **语气**：专业、克制、结果导向。"
   }
 };
 
-const SKILL_LINKAGE = { b1: ["e1"], b2: ["e2"] };
+const SKILL_LINKAGE = { b1: ["e1"], b2: ["e2"], b3: ["e3", "e4"] };
 
 // --- 2. 打字机组件 ---
 function Typewriter({ text, speed = 30, delay = 0, onComplete, className = "" }) {
@@ -216,6 +289,53 @@ export default function App() {
   );
 }
 
+// --- 3. PPT 渲染组件 ---
+const PPTRenderer = ({ step, isComplete }) => {
+  const totalSlides = 6;
+  const activeCount = isComplete ? totalSlides : Math.min(step + 1, totalSlides);
+
+  return (
+    <div className="grid grid-cols-3 gap-2 sm:gap-3 p-3 sm:p-4 bg-slate-800/50 rounded-xl mt-4">
+      {Array.from({ length: totalSlides }).map((_, i) => (
+      <motion.div
+        key={i}
+        initial={{ opacity: 0.35, scale: 0.96 }}
+        animate={
+          i < activeCount
+            ? { opacity: 1, backgroundColor: "#ffffff", scale: 1 }
+            : { opacity: 0.35, backgroundColor: "rgba(148,163,184,0.2)", scale: 0.96 }
+        }
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="aspect-[16/9] border border-white/10 rounded flex flex-col p-1.5 overflow-hidden relative shadow-sm"
+      >
+        {i < activeCount && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="w-full h-full flex flex-col gap-1"
+          >
+            <div className={`w-1/3 h-1 rounded ${i % 2 === 0 ? "bg-blue-500" : "bg-purple-500"}`} />
+            <div className="w-full h-[2px] bg-slate-200 rounded" />
+            <div className="w-4/5 h-[2px] bg-slate-200 rounded" />
+            <div className={`flex-1 mt-1 rounded-sm ${i === 0 ? "bg-slate-100 flex items-center justify-center" : "bg-slate-50"}`}>
+              {i === 0 && <div className="text-[5px] text-slate-400 font-bold">TITLE</div>}
+              {i > 0 && (
+                <div className="w-full h-full grid grid-cols-2 gap-[1px] content-start p-[1px]">
+                  <div className="bg-slate-200 h-2 rounded-[1px]" />
+                  <div className="bg-slate-200 h-2 rounded-[1px]" />
+                  <div className="bg-slate-200 h-2 rounded-[1px]" />
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </motion.div>
+    ))}
+    </div>
+  );
+};
+
 // ================= 3. 战斗场景组件 (优化移动端对话与进度展示) =================
 function BattleScene({ bossSkill, empSkill, onBack, onLearnMore }) {
   const [turnState, setTurnState] = useState("loop"); 
@@ -227,6 +347,10 @@ function BattleScene({ bossSkill, empSkill, onBack, onLearnMore }) {
   const scrollRef = useRef(null);
 
   const isBossDefeated = turnState === "boss_satisfied";
+  const isPPTSkill = Boolean(empSkill.isPPT || ["e3", "e4"].includes(empSkill.id));
+  const pptTotalSlides = 6;
+  const totalStepCount = isPPTSkill ? pptTotalSlides : empSkill.castSteps.length;
+  const stepDisplayCount = isPPTSkill ? (isCastingDone ? pptTotalSlides : Math.min(castStepIndex + 1, pptTotalSlides)) : castStepIndex + 1;
 
   useEffect(() => {
     setIsBossSpeechDone(false);
@@ -377,11 +501,11 @@ function BattleScene({ bossSkill, empSkill, onBack, onLearnMore }) {
       {/* 底部按钮 - 移动端全宽并减小高度 */}
       <div className="w-full max-w-4xl h-24 md:h-32 bg-slate-900/90 rounded-2xl md:rounded-3xl border-2 md:border-4 border-slate-700 backdrop-blur-xl flex items-center justify-center p-4 shadow-2xl">
         <button 
-          onClick={handleStartCast} 
-          disabled={turnState !== "loop"} 
-          className={`w-full md:w-auto md:px-16 py-3 md:py-4 rounded-xl font-black text-lg md:text-2xl flex items-center justify-center gap-3 border-b-4 md:border-b-8 transition-all active:translate-y-1 md:active:translate-y-2 active:border-b-0 ${turnState === "loop" ? "bg-blue-600 border-blue-800 text-white" : "bg-slate-800 border-slate-950 text-slate-600 opacity-40"} ${turnState === "loop" && isBossSpeechDone ? "breath-btn" : ""}`}
+          onClick={handleStartCast}
+          disabled={turnState === "casting"}
+          className="w-full md:w-auto px-6 md:px-10 py-3 md:py-4 rounded-xl font-black text-sm md:text-lg bg-gradient-to-r from-yellow-400 to-yellow-500 text-black border-2 border-black shadow-[4px_4px_0_#000] flex items-center justify-center gap-3 disabled:opacity-50"
         >
-          <empSkill.icon size={22} /> {empSkill.name.split('·')[1]}
+          <empSkill.icon size={22} /> {empSkill.name.split("·")[1]} 发动
         </button>
       </div>
 
@@ -400,32 +524,32 @@ function BattleScene({ bossSkill, empSkill, onBack, onLearnMore }) {
 
               <div className="bg-slate-950 p-5 md:p-8 min-h-[360px] md:min-h-[420px] flex flex-col">
                 <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
-                  <div className="min-w-0 pr-2">
-                    <div className="text-[9px] uppercase font-bold text-slate-500 mb-1">Process</div>
-                    <div className="text-lg md:text-3xl font-black truncate" style={{ color: empSkill.brandColor }}>{empSkill.techTitle}</div>
-                  </div>
-                  <div className="text-sm md:text-xl font-mono font-bold text-slate-600 bg-slate-900 px-3 py-1 md:px-4 md:py-2 rounded-lg">{castStepIndex + 1}/{empSkill.castSteps.length}</div>
+                  <div className="text-sm md:text-base font-black text-slate-200">{empSkill.techTitle}</div>
+                  <div className="text-[10px] md:text-xs text-slate-400">Step {stepDisplayCount}/{totalStepCount}</div>
                 </div>
 
-                <div className="flex-1 flex items-center justify-center mb-6">
-                  <div className="space-y-4 w-full">
+                <div className="flex-1 flex flex-col justify-between">
+                  <div className="text-center text-sm md:text-base text-slate-300 mb-4 md:mb-6 animate-pulse">
+                    {empSkill.castSteps[castStepIndex]}
+                  </div>
+
+                  {isPPTSkill ? (
+                    <PPTRenderer step={castStepIndex} isComplete={isCastingDone} />
+                  ) : (
                     <div className="bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-sm md:text-base font-medium leading-relaxed" style={{ color: empSkill.brandColor }}>
                       {empSkill.castSteps[castStepIndex]}
                     </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-white/5 flex flex-col items-center">
-                  {!isCastingDone ? (
-                    <div className="w-full text-center">
-                      <div className="text-sm md:text-lg font-black text-white italic mb-4">{empSkill.castSteps[castStepIndex]}</div>
-                      <div className="flex justify-center gap-1">{empSkill.castSteps.map((_, i) => (<div key={i} className={`h-1 rounded-full transition-all duration-500 ${castStepIndex >= i ? 'w-6 md:w-8' : 'w-1.5 md:w-2 bg-white/10'}`} style={{ backgroundColor: castStepIndex >= i ? empSkill.brandColor : undefined }} />))}</div>
-                    </div>
-                  ) : (
-                    <motion.button initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} onClick={handleFire} className="w-full py-4 rounded-xl font-black text-base md:text-xl flex items-center justify-center gap-2 shadow-2xl" style={{ backgroundColor: empSkill.brandColor }}>
-                      <Send size={20}/> {empSkill.actionBtn}
-                    </motion.button>
                   )}
+
+                  <div className="mt-6 flex items-center justify-end">
+                    <button
+                      onClick={handleFire}
+                      disabled={!isCastingDone}
+                      className="px-5 py-2.5 rounded-lg font-black text-sm md:text-base bg-green-500 text-black border-2 border-black shadow-[3px_3px_0_#000] disabled:opacity-40"
+                    >
+                      {isCastingDone ? "释放技能" : "生成中..."}
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -436,9 +560,11 @@ function BattleScene({ bossSkill, empSkill, onBack, onLearnMore }) {
   );
 }
 
+// ================= 4. 学习界面组件 =================
 function GuideScene({ skill, onBack }) {
   const [typedText, setTypedText] = useState("");
   const [copied, setCopied] = useState(false);
+  const isPPTCollection = skill.type === "ppt_collection";
 
   useEffect(() => {
     let index = 0;
@@ -479,21 +605,23 @@ function GuideScene({ skill, onBack }) {
     }
   };
 
-  const handleEnter = () => {
-    if (skill.link) {
-      window.open(skill.link, "_blank", "noopener");
+  const handleEnter = (url) => {
+    const fallback = skill.tools && skill.tools[0] ? skill.tools[0].link : null;
+    const target = url || skill.link || fallback;
+    if (target) {
+      window.open(target, "_blank", "noopener");
     }
   };
 
   const renderPromptNodes = (text) => {
-    const parts = text.split(/(\[(?:角色设定|任务目标|约束条件|输出格式)\])/);
+    const parts = text.split(/(\[(?:角色|角色设定|任务|任务目标|要求|约束条件|输出格式)\])/);
     return parts
       .filter(Boolean)
       .map((part, index) => {
-        if (part === "[角色设定]") return <span key={index} className="tag-role">{part}</span>;
-        if (part === "[任务目标]") return <span key={index} className="tag-goal">{part}</span>;
-        if (part === "[约束条件]") return <span key={index} className="tag-constraint">{part}</span>;
-        if (part === "[输出格式]") return <span key={index} className="tag-format">{part}</span>;
+        if (part.includes("角色")) return <span key={index} className="tag-role">{part}</span>;
+        if (part.includes("任务")) return <span key={index} className="tag-goal">{part}</span>;
+        if (part.includes("要求") || part.includes("约束")) return <span key={index} className="tag-constraint">{part}</span>;
+        if (part.includes("输出")) return <span key={index} className="tag-format">{part}</span>;
         return <span key={index} className="text-slate-200">{part}</span>;
       });
   };
@@ -502,8 +630,8 @@ function GuideScene({ skill, onBack }) {
     <div className="relative z-10 h-full w-full flex flex-col bg-black text-white">
       <div className="absolute inset-0 guide-grid opacity-40"></div>
 
-      <div className="relative z-10 h-full flex flex-col p-4 md:p-8 gap-6">
-        <div className="flex items-center justify-between bg-slate-950/80 border border-white/10 rounded-2xl p-4 md:p-5 glass-20 shadow-2xl">
+      <div className="relative z-10 h-full flex flex-col p-4 md:p-8 gap-4 overflow-y-auto">
+        <div className="flex items-center justify-between bg-slate-950/80 border border-white/10 rounded-2xl p-4 md:p-5 glass-20 shadow-2xl flex-shrink-0">
           <button onClick={onBack} className="text-slate-300 hover:text-white flex items-center gap-2 font-bold text-sm md:text-base">
             <ArrowLeft size={18} /> BACK
           </button>
@@ -511,41 +639,84 @@ function GuideScene({ skill, onBack }) {
           <div className="w-12 md:w-16"></div>
         </div>
 
-        <div className="flex flex-col gap-6 flex-1">
-          <div className="flex items-center gap-4 bg-slate-900/80 border border-white/10 rounded-2xl p-4 md:p-6 glass-20 shadow-2xl">
-            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl border-2 flex items-center justify-center" style={{ borderColor: skill.brandColor }}>
-              <skill.brandIcon size={24} style={{ color: skill.brandColor }} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xl md:text-2xl font-black tracking-wide">{skill.brand}</div>
-              <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs md:text-sm font-black border" style={{ color: skill.brandColor, borderColor: `${skill.brandColor}66`, backgroundColor: `${skill.brandColor}22` }}>
-                获胜策略
+        {isPPTCollection ? (
+          <div className="flex-1 flex flex-col gap-6">
+            <div className="bg-slate-900/80 border border-white/10 rounded-2xl p-4 md:p-6 glass-20 shadow-2xl">
+              <div className="text-lg md:text-xl font-black mb-4 flex items-center gap-2">
+                <LayoutTemplate className="text-blue-400" /> PPT 神器推荐
               </div>
-              <div className="mt-2 text-sm md:text-base text-slate-300 leading-relaxed">{skill.strategy}</div>
+              <div className="grid gap-3">
+                {skill.tools.map((tool, idx) => (
+                  <div key={idx} className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/5 transition-colors cursor-default">
+                    <div>
+                      <div className="font-bold text-base text-blue-200">{tool.name}</div>
+                      <div className="text-xs text-slate-400">{tool.desc}</div>
+                    </div>
+                    <button onClick={() => handleEnter(tool.link)} className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white text-xs font-bold rounded-lg transition-colors border border-blue-500/30 cursor-pointer">
+                      <ExternalLink size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="flex-1 flex flex-col gap-4 bg-slate-900/80 border border-white/10 rounded-2xl p-4 md:p-6 glass-20 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <div className="text-sm md:text-base font-black text-blue-300 uppercase tracking-widest">Master Prompt</div>
-              <button onClick={handleCopy} className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-black border border-blue-400/60 text-blue-200 bg-blue-500/10">
-                {copied ? "已复制" : "📋 一键复制"}
+            <div className="flex-1 flex flex-col gap-4 bg-slate-900/80 border border-white/10 rounded-2xl p-4 md:p-6 glass-20 shadow-2xl min-h-0">
+              <div className="flex items-center justify-between">
+                <div className="text-sm md:text-base font-black text-purple-300 uppercase tracking-widest">万能 PPT 结构模版</div>
+                <button onClick={handleCopy} className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-black border border-purple-400/60 text-purple-200 bg-purple-500/10 hover:bg-purple-500/20 transition-colors">
+                  {copied ? "已复制" : "📋 一键复制提示词"}
+                </button>
+              </div>
+              <div className="flex-1 bg-slate-950/80 rounded-2xl prompt-frame p-4 md:p-5 overflow-hidden">
+                <div className="h-full overflow-y-auto pr-1 font-mono text-sm md:text-base leading-relaxed text-slate-200 whitespace-pre-wrap">
+                  {renderPromptNodes(typedText)}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-1 flex-shrink-0">
+              <button onClick={() => handleEnter()} className="w-full py-4 md:py-5 rounded-2xl font-black text-base md:text-xl text-black bg-gradient-to-r from-green-400 to-green-600 border-2 border-black shadow-[6px_6px_0_#000] pulse-btn">
+                前往实战
               </button>
             </div>
-
-            <div className="flex-1 bg-slate-950/80 rounded-2xl prompt-frame p-4 md:p-5 overflow-hidden">
-              <div className="h-full overflow-y-auto pr-1 font-mono text-sm md:text-base leading-relaxed text-slate-200 whitespace-pre-wrap">
-                {renderPromptNodes(typedText)}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-6 flex-1">
+            <div className="flex items-center gap-4 bg-slate-900/80 border border-white/10 rounded-2xl p-4 md:p-6 glass-20 shadow-2xl flex-shrink-0">
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl border-2 flex items-center justify-center" style={{ borderColor: skill.brandColor }}>
+                <skill.brandIcon size={24} style={{ color: skill.brandColor }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xl md:text-2xl font-black tracking-wide">{skill.brand}</div>
+                <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs md:text-sm font-black border" style={{ color: skill.brandColor, borderColor: `${skill.brandColor}66`, backgroundColor: `${skill.brandColor}22` }}>
+                  获胜策略
+                </div>
+                <div className="mt-2 text-sm md:text-base text-slate-300 leading-relaxed">{skill.strategy}</div>
               </div>
             </div>
-          </div>
 
-          <div className="pt-1">
-            <button onClick={handleEnter} className="w-full py-4 md:py-5 rounded-2xl font-black text-base md:text-xl text-black bg-gradient-to-r from-green-400 to-green-600 border-2 border-black shadow-[6px_6px_0_#000] pulse-btn">
-              进入 {skill.brand} 开始实战
-            </button>
+            <div className="flex-1 flex flex-col gap-4 bg-slate-900/80 border border-white/10 rounded-2xl p-4 md:p-6 glass-20 shadow-2xl min-h-0">
+              <div className="flex items-center justify-between">
+                <div className="text-sm md:text-base font-black text-blue-300 uppercase tracking-widest">Master Prompt</div>
+                <button onClick={handleCopy} className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-black border border-blue-400/60 text-blue-200 bg-blue-500/10 hover:bg-blue-500/20 transition-colors">
+                  {copied ? "已复制" : "📋 一键复制"}
+                </button>
+              </div>
+
+              <div className="flex-1 bg-slate-950/80 rounded-2xl prompt-frame p-4 md:p-5 overflow-hidden">
+                <div className="h-full overflow-y-auto pr-1 font-mono text-sm md:text-base leading-relaxed text-slate-200 whitespace-pre-wrap">
+                  {renderPromptNodes(typedText)}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-1 flex-shrink-0">
+              <button onClick={() => handleEnter()} className="w-full py-4 md:py-5 rounded-2xl font-black text-base md:text-xl text-black bg-gradient-to-r from-green-400 to-green-600 border-2 border-black shadow-[6px_6px_0_#000] pulse-btn">
+                进入 {skill.brand} 开始实战
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
