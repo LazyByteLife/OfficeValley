@@ -41,6 +41,35 @@ const ALL_EMP_SKILLS = [
   }
 ];
 
+const GUIDE_SKILLS = {
+  e1: {
+    id: "e1",
+    brand: "DeepSeek",
+    brandColor: "#007AFF",
+    brandIcon: MessageCircle,
+    strategy: "结构化拒绝法：先肯定价值，再陈述客观冲突，最后给出可执行替代方案。",
+    masterPrompt:
+      "[角色设定] 你是资深职场沟通顾问，语气专业克制、尊重上下级关系。\n" +
+      "[任务目标] 生成一段礼貌拒绝参加 17:59 临时会议的回复。\n" +
+      "[约束条件] 必须包含：肯定价值 + 客观冲突 + 替代方案；长度 80-120 字；不情绪化、不抱怨；可承诺补看纪要或提供书面输入。\n" +
+      "[输出格式] 仅输出一段可直接发送的中文回复。",
+    link: "https://deepseek.com/"
+  },
+  e2: {
+    id: "e2",
+    brand: "Kimi",
+    brandColor: "#00E266",
+    brandIcon: Sparkles,
+    strategy: "价值锚点放大法：把零散事务上升为关键目标推进与可量化价值。",
+    masterPrompt:
+      "[角色设定] 你是资深职场沟通顾问，擅长将具体工作与业务目标对齐。\n" +
+      "[任务目标] 把一条具体任务扩写为“关键目标推进”的周报段落，适用于任何行业。\n" +
+      "[约束条件] 清晰说明背景、动作、结果与价值；给出1-2个可量化指标或合理区间；避免空话与夸大；字数 150-220 字。\n" +
+      "[输出格式] 输出一段周报正文，不要标题。",
+    link: "https://kimi.moonshot.cn/"
+  }
+};
+
 const SKILL_LINKAGE = { b1: ["e1"], b2: ["e2"] };
 
 // --- 2. 打字机组件 ---
@@ -75,10 +104,12 @@ function Typewriter({ text, speed = 30, delay = 0, onComplete, className = "" })
 export default function App() {
   const [scene, setScene] = useState("start");
   const [selected, setSelected] = useState({ boss: [], emp: [] });
+  const [guideSkillId, setGuideSkillId] = useState(null);
   const availableEmpSkills = useMemo(() => {
     const bossId = selected.boss[0];
     return bossId ? ALL_EMP_SKILLS.filter(s => SKILL_LINKAGE[bossId].includes(s.id)) : [];
   }, [selected.boss]);
+  const guideSkill = guideSkillId ? GUIDE_SKILLS[guideSkillId] : null;
 
   const toggleSkill = (role, id) => {
     setSelected(prev => {
@@ -133,7 +164,24 @@ export default function App() {
         )}
 
         {scene === "battle" && (
-          <BattleScene key="battle" bossSkill={BOSS_SKILLS.find(s => s.id === selected.boss[0])} empSkill={ALL_EMP_SKILLS.find(s => s.id === selected.emp[0])} onBack={() => setScene("select")} />
+          <BattleScene
+            key="battle"
+            bossSkill={BOSS_SKILLS.find(s => s.id === selected.boss[0])}
+            empSkill={ALL_EMP_SKILLS.find(s => s.id === selected.emp[0])}
+            onBack={() => setScene("select")}
+            onLearnMore={(id) => {
+              setGuideSkillId(id);
+              setScene("guide");
+            }}
+          />
+        )}
+
+        {scene === "guide" && (
+          <GuideScene
+            key="guide"
+            skill={guideSkill || GUIDE_SKILLS.e1}
+            onBack={() => setScene("battle")}
+          />
         )}
       </AnimatePresence>
 
@@ -146,13 +194,22 @@ export default function App() {
         @keyframes glitch { 0% { opacity: 1; } 50% { opacity: 0.4; transform: scale(1.1); } 100% { opacity: 1; } }
         .winner-aura { animation: winner-aura-pulse 2s infinite; }
         @keyframes winner-aura-pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); } 70% { box-shadow: 0 0 0 20px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        .guide-grid { background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 40px 40px; }
+        .glass-20 { backdrop-filter: blur(20px); }
+        .prompt-frame { border: 2px dashed rgba(148, 163, 184, 0.35); box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6); }
+        .pulse-btn { animation: pulse-glow 2.2s ease-in-out infinite; }
+        @keyframes pulse-glow { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45); } 70% { transform: scale(1.02); box-shadow: 0 0 0 18px rgba(34, 197, 94, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        .tag-role { color: #facc15; }
+        .tag-goal { color: #22c55e; }
+        .tag-constraint { color: #60a5fa; }
+        .tag-format { color: #f97316; }
       `}</style>
     </div>
   );
 }
 
 // ================= 3. 战斗场景组件 (优化移动端对话与进度展示) =================
-function BattleScene({ bossSkill, empSkill, onBack }) {
+function BattleScene({ bossSkill, empSkill, onBack, onLearnMore }) {
   const [turnState, setTurnState] = useState("loop"); 
   const [isBossAngry, setIsBossAngry] = useState(false);
   const [castStepIndex, setCastStepIndex] = useState(0); 
@@ -214,7 +271,7 @@ function BattleScene({ bossSkill, empSkill, onBack }) {
     }, 800);
   };
 
-  const handleLearnMore = () => empSkill.link && window.open(empSkill.link, "_blank");
+  const handleLearnMore = () => onLearnMore && onLearnMore(empSkill.id);
 
   return (
     <div className="relative z-20 h-full w-full flex flex-col items-center justify-between p-4 md:p-6">
@@ -361,6 +418,121 @@ function BattleScene({ bossSkill, empSkill, onBack }) {
           </div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+function GuideScene({ skill, onBack }) {
+  const [typedText, setTypedText] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    let index = 0;
+    let intervalId = null;
+    setTypedText("");
+
+    intervalId = setInterval(() => {
+      index += 2;
+      const snippet = skill.masterPrompt.slice(0, index);
+      setTypedText(snippet);
+      if (index >= skill.masterPrompt.length) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    }, 20);
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [skill]);
+
+  const handleCopy = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(skill.masterPrompt);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = skill.masterPrompt;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (error) {
+      setCopied(false);
+    }
+  };
+
+  const handleEnter = () => {
+    if (skill.link) {
+      window.open(skill.link, "_blank", "noopener");
+    }
+  };
+
+  const renderPromptNodes = (text) => {
+    const parts = text.split(/(\[(?:角色设定|任务目标|约束条件|输出格式)\])/);
+    return parts
+      .filter(Boolean)
+      .map((part, index) => {
+        if (part === "[角色设定]") return <span key={index} className="tag-role">{part}</span>;
+        if (part === "[任务目标]") return <span key={index} className="tag-goal">{part}</span>;
+        if (part === "[约束条件]") return <span key={index} className="tag-constraint">{part}</span>;
+        if (part === "[输出格式]") return <span key={index} className="tag-format">{part}</span>;
+        return <span key={index} className="text-slate-200">{part}</span>;
+      });
+  };
+
+  return (
+    <div className="relative z-10 h-full w-full flex flex-col bg-black text-white">
+      <div className="absolute inset-0 guide-grid opacity-40"></div>
+
+      <div className="relative z-10 h-full flex flex-col p-4 md:p-8 gap-6">
+        <div className="flex items-center justify-between bg-slate-950/80 border border-white/10 rounded-2xl p-4 md:p-5 glass-20 shadow-2xl">
+          <button onClick={onBack} className="text-slate-300 hover:text-white flex items-center gap-2 font-bold text-sm md:text-base">
+            <ArrowLeft size={18} /> BACK
+          </button>
+          <div className="text-sm md:text-lg font-black text-yellow-400 tracking-widest">AI 攻略</div>
+          <div className="w-12 md:w-16"></div>
+        </div>
+
+        <div className="flex flex-col gap-6 flex-1">
+          <div className="flex items-center gap-4 bg-slate-900/80 border border-white/10 rounded-2xl p-4 md:p-6 glass-20 shadow-2xl">
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl border-2 flex items-center justify-center" style={{ borderColor: skill.brandColor }}>
+              <skill.brandIcon size={24} style={{ color: skill.brandColor }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xl md:text-2xl font-black tracking-wide">{skill.brand}</div>
+              <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs md:text-sm font-black border" style={{ color: skill.brandColor, borderColor: `${skill.brandColor}66`, backgroundColor: `${skill.brandColor}22` }}>
+                获胜策略
+              </div>
+              <div className="mt-2 text-sm md:text-base text-slate-300 leading-relaxed">{skill.strategy}</div>
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col gap-4 bg-slate-900/80 border border-white/10 rounded-2xl p-4 md:p-6 glass-20 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <div className="text-sm md:text-base font-black text-blue-300 uppercase tracking-widest">Master Prompt</div>
+              <button onClick={handleCopy} className="px-3 py-1.5 rounded-lg text-xs md:text-sm font-black border border-blue-400/60 text-blue-200 bg-blue-500/10">
+                {copied ? "已复制" : "📋 一键复制"}
+              </button>
+            </div>
+
+            <div className="flex-1 bg-slate-950/80 rounded-2xl prompt-frame p-4 md:p-5 overflow-hidden">
+              <div className="h-full overflow-y-auto pr-1 font-mono text-sm md:text-base leading-relaxed text-slate-200">
+                {renderPromptNodes(typedText)}
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-1">
+            <button onClick={handleEnter} className="w-full py-4 md:py-5 rounded-2xl font-black text-base md:text-xl text-black bg-gradient-to-r from-green-400 to-green-600 border-2 border-black shadow-[6px_6px_0_#000] pulse-btn">
+              进入 {skill.brand} 开始实战
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
