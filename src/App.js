@@ -76,9 +76,15 @@ const SKILL_LINKAGE = { b1: ["e1"], b2: ["e2"] };
 function Typewriter({ text, speed = 30, delay = 0, onComplete, className = "" }) {
   const [displayedText, setDisplayedText] = useState("");
   const hasCompleted = useRef(false);
+  const onCompleteRef = useRef(onComplete);
 
   useEffect(() => {
-    setDisplayedText(""); 
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
+  useEffect(() => {
+    setDisplayedText("");
+    hasCompleted.current = false;
     const timeout = setTimeout(() => {
       let i = 0;
       const interval = setInterval(() => {
@@ -87,16 +93,16 @@ function Typewriter({ text, speed = 30, delay = 0, onComplete, className = "" })
           i++;
         } else {
           clearInterval(interval);
-          if (onComplete && !hasCompleted.current) {
+          if (onCompleteRef.current && !hasCompleted.current) {
             hasCompleted.current = true;
-            onComplete();
+            onCompleteRef.current();
           }
         }
       }, speed);
       return () => clearInterval(interval);
     }, delay);
     return () => clearTimeout(timeout);
-  }, [text, speed, delay, onComplete]);
+  }, [text, speed, delay]);
 
   return <span className={className}>{displayedText}</span>;
 }
@@ -198,7 +204,9 @@ export default function App() {
         .glass-20 { backdrop-filter: blur(20px); }
         .prompt-frame { border: 2px dashed rgba(148, 163, 184, 0.35); box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6); }
         .pulse-btn { animation: pulse-glow 2.2s ease-in-out infinite; }
+        .breath-btn { animation: breathe 1.8s ease-in-out infinite; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); }
         @keyframes pulse-glow { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45); } 70% { transform: scale(1.02); box-shadow: 0 0 0 18px rgba(34, 197, 94, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        @keyframes breathe { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); } 60% { transform: scale(1.04); box-shadow: 0 0 0 14px rgba(59, 130, 246, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
         .tag-role { color: #facc15; }
         .tag-goal { color: #22c55e; }
         .tag-constraint { color: #60a5fa; }
@@ -215,13 +223,19 @@ function BattleScene({ bossSkill, empSkill, onBack, onLearnMore }) {
   const [castStepIndex, setCastStepIndex] = useState(0); 
   const [isCastingDone, setIsCastingDone] = useState(false);
   const [isSatisfiedTypingDone, setIsSatisfiedTypingDone] = useState(false); 
+  const [isBossSpeechDone, setIsBossSpeechDone] = useState(false);
   const scrollRef = useRef(null);
 
   const isBossDefeated = turnState === "boss_satisfied";
 
   useEffect(() => {
+    setIsBossSpeechDone(false);
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [turnState, castStepIndex, isSatisfiedTypingDone]);
+
+  useEffect(() => {
+    setIsBossSpeechDone(false);
+  }, [bossSkill.id]);
 
   useEffect(() => {
     if (["casting", "player_atk", "boss_satisfied"].includes(turnState)) {
@@ -311,7 +325,7 @@ function BattleScene({ bossSkill, empSkill, onBack, onLearnMore }) {
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex justify-start">
              <div className={`p-4 md:p-6 rounded-2xl rounded-tl-none max-w-[85%] md:max-w-sm bg-white text-black shadow-2xl border-2 md:border-4 ${isBossAngry ? "shake-crazy border-red-500" : "border-transparent"}`}>
                <div className="text-[9px] md:text-[10px] font-black mb-1 md:mb-2 text-red-500 border-b pb-1.5">{bossSkill.nickname}</div>
-               <div className="text-base md:text-xl font-black leading-snug">“<Typewriter text={bossSkill.attackText} speed={40} />”</div>
+               <div className="text-base md:text-xl font-black leading-snug">“<Typewriter text={bossSkill.attackText} speed={40} onComplete={() => setIsBossSpeechDone(true)} />”</div>
              </div>
           </motion.div>
         )}
@@ -365,7 +379,7 @@ function BattleScene({ bossSkill, empSkill, onBack, onLearnMore }) {
         <button 
           onClick={handleStartCast} 
           disabled={turnState !== "loop"} 
-          className={`w-full md:w-auto md:px-16 py-3 md:py-4 rounded-xl font-black text-lg md:text-2xl flex items-center justify-center gap-3 border-b-4 md:border-b-8 transition-all active:translate-y-1 md:active:translate-y-2 active:border-b-0 ${turnState === "loop" ? "bg-blue-600 border-blue-800 text-white" : "bg-slate-800 border-slate-950 text-slate-600 opacity-40"}`}
+          className={`w-full md:w-auto md:px-16 py-3 md:py-4 rounded-xl font-black text-lg md:text-2xl flex items-center justify-center gap-3 border-b-4 md:border-b-8 transition-all active:translate-y-1 md:active:translate-y-2 active:border-b-0 ${turnState === "loop" ? "bg-blue-600 border-blue-800 text-white" : "bg-slate-800 border-slate-950 text-slate-600 opacity-40"} ${turnState === "loop" && isBossSpeechDone ? "breath-btn" : ""}`}
         >
           <empSkill.icon size={22} /> {empSkill.name.split('·')[1]}
         </button>
@@ -520,7 +534,7 @@ function GuideScene({ skill, onBack }) {
             </div>
 
             <div className="flex-1 bg-slate-950/80 rounded-2xl prompt-frame p-4 md:p-5 overflow-hidden">
-              <div className="h-full overflow-y-auto pr-1 font-mono text-sm md:text-base leading-relaxed text-slate-200">
+              <div className="h-full overflow-y-auto pr-1 font-mono text-sm md:text-base leading-relaxed text-slate-200 whitespace-pre-wrap">
                 {renderPromptNodes(typedText)}
               </div>
             </div>
