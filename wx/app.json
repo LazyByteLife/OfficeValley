@@ -1,6 +1,7 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/index/index",
+    "pages/guide/guide"
   ],
   "window": {
     "navigationBarTitleText": "摸鱼谷物语",

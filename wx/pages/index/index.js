@@ -41,7 +41,14 @@ const ALL_EMP_SKILLS = [
     actionBtn: "发送回复",
     resultType: "text",
     resultContent: "收到。但我手头有一个紧急需求必须在今晚交付，可能无法参加。我会看纪要，有需要我配合的随时同步。",
-    link: "https://deepseek.com/"
+    link: "https://deepseek.com/",
+    targetAppId: "wx5fe31a9ac20a3fae",
+    strategy: "结构化拒绝法：先肯定价值，再陈述客观冲突，最后给出可执行替代方案。",
+    masterPrompt:
+      "[角色设定] 你是资深职场沟通顾问，语气专业克制、尊重上下级关系。\n" +
+      "[任务目标] 生成一段礼貌拒绝参加 17:59 临时会议的回复。\n" +
+      "[约束条件] 必须包含：肯定价值 + 客观冲突 + 替代方案；长度 80-120 字；不情绪化、不抱怨；可承诺补看纪要或提供书面输入。\n" +
+      "[输出格式] 仅输出一段可直接发送的中文回复。"
   },
   {
     id: "e2",
@@ -63,7 +70,14 @@ const ALL_EMP_SKILLS = [
     resultType: "file",
     resultTitle: "本周工作复盘.docx",
     resultDesc: "字数: 3,420 | 查重率: 0% | 黑话浓度: 极高",
-    link: "https://kimi.moonshot.cn/"
+    link: "https://kimi.moonshot.cn/",
+    targetAppId: "wx4984641680c131dc",
+    strategy: "价值锚点放大法：把单点修复提升为关键链路优化与系统性收益。",
+    masterPrompt:
+      "[角色设定] 你是资深技术负责人，擅长从工程价值与业务影响角度复盘工作。\n" +
+      "[任务目标] 将“修复一个 Bug”扩写为“底层链路优化”的周报段落。\n" +
+      "[约束条件] 强调稳定性提升、故障率下降、扩展性收益；避免空话；字数 150-220 字；可量化处请给出合理区间。\n" +
+      "[输出格式] 输出一段周报正文，不要标题。"
   }
 ];
 
@@ -195,14 +209,9 @@ Page({
   },
 
   handleLearnMore() {
-    const link = this.data.currentEmpSkill && this.data.currentEmpSkill.link;
-    if (!link) return;
-    wx.setClipboardData({
-      data: link,
-      success: () => {
-        wx.showToast({ title: "链接已复制", icon: "success" });
-      }
-    });
+    const skillId = this.data.currentEmpSkill && this.data.currentEmpSkill.id;
+    if (!skillId) return;
+    wx.navigateTo({ url: "/pages/guide/guide?id=" + skillId });
   },
 
   setTurnState(state) {
