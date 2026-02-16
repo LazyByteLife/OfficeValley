@@ -667,7 +667,7 @@ function GuideScene({ skill, onBack }) {
                   {copied ? "已复制" : "📋 一键复制提示词"}
                 </button>
               </div>
-              <div className="flex-1 bg-slate-950/80 rounded-2xl prompt-frame p-4 md:p-5 overflow-hidden">
+              <div className="flex-1 bg-slate-950/80 rounded-2xl prompt-frame p-4 md:p-5 overflow-hidden max-h-[36vh] md:max-h-none">
                 <div className="h-full overflow-y-auto pr-1 font-mono text-sm md:text-base leading-relaxed text-slate-200 whitespace-pre-wrap">
                   {renderPromptNodes(typedText)}
                 </div>
@@ -703,7 +703,7 @@ function GuideScene({ skill, onBack }) {
                 </button>
               </div>
 
-              <div className="flex-1 bg-slate-950/80 rounded-2xl prompt-frame p-4 md:p-5 overflow-hidden">
+              <div className="flex-1 bg-slate-950/80 rounded-2xl prompt-frame p-4 md:p-5 overflow-hidden max-h-[36vh] md:max-h-none">
                 <div className="h-full overflow-y-auto pr-1 font-mono text-sm md:text-base leading-relaxed text-slate-200 whitespace-pre-wrap">
                   {renderPromptNodes(typedText)}
                 </div>
